@@ -34,7 +34,16 @@ class RequestWeather():
     async def get_weather_json(self, model: WeatherInputModel) -> dict:
         ans = await self.get_weather_raw(model)
         try:
-            temperatures = sorted(a["temp"] for b in ans["days"] for a in b["hours"])
+            temperatures = sorted(
+            [
+                a["temp"] for b in ans["days"]
+                if "hours" in b
+                for a in b["hours"]
+            ] + [
+                a["temp"] for a in ans["days"]
+                if "hours" not in a
+                ]
+            )
             min_temperature = temperatures[0]
             max_temperature = temperatures[-1]
             arithmetic_temperature = round(sum(temperatures) / len(temperatures), 1)
