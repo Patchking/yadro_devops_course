@@ -2,6 +2,7 @@ import json
 import httpx
 import logging
 import pydantic
+import traceback
 from models import WeatherInputModel
 # from math import round
 
@@ -11,23 +12,24 @@ class RequestWeather():
 
     async def get_weather_raw(self, model: WeatherInputModel) -> dict | str:
         try:
+            out = None
             async with httpx.AsyncClient() as client:
                 url_to_request = f"https://weather.visualcrossing.com/VisualCrossingWebServices/rest/services/timeline/{model.city}/{model.date_from}/{model.date_to}?key={self.token}&unitGroup=metric&include=hours&elements=datetime,temp"
                 ans = await client.get(url_to_request)
             decoded_answer = ans.content.decode()
-            out = json.loads(decoded_answer)
-        except httpx.ConnectTimeout as e:
-            logging.error("Whoops. Something went wrong while requesting weather information.")
-            logging.error(e.args)
-            out = {"error": e.args}
-        except httpx.ConnectError as e:
-            logging.error("Whoops. Something went wrong while requesting weather information.")
-            logging.error(e.args)
-            out = {"error": e.args}
+            out: str = json.loads(decoded_answer)
         except json.JSONDecodeError as e:
-            logging.error("Not a json returned")
-            logging.error(decoded_answer)
-            out =  decoded_answer
+            if isinstance(out, str) and out.startswith("You have exceeded the maximum number of daily result records for your account."):
+                logging.info("Access key expired. Please change key!")
+                out = "Access key expired. Please change key!"
+            else:
+                logging.error("Not a json returned")
+                logging.error(decoded_answer)
+                out = decoded_answer
+        except Exception as e:
+            logging.error("Whoops. Something went wrong while requesting weather information.")
+            logging.error(traceback.print_exc())
+            out = {"error": e.args}
         finally:
             return out
         
