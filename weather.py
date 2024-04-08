@@ -4,6 +4,7 @@ import logging
 import pydantic
 import traceback
 from models import WeatherInputModel
+from errors import UnexpetedAPIAnswerException
 # from math import round
 
 class RequestWeather():
@@ -20,18 +21,17 @@ class RequestWeather():
             out: str = json.loads(decoded_answer)
         except json.JSONDecodeError as e:
             if isinstance(out, str) and out.startswith("You have exceeded the maximum number of daily result records for your account."):
-                logging.info("Access key expired. Please change key!")
-                out = "Access key expired. Please change key!"
+                logging.error("Access key expired. Please change key!")
+                raise UnexpetedAPIAnswerException("Access key expired. Please change key!")
             else:
                 logging.error("Not a json returned")
                 logging.error(decoded_answer)
-                out = decoded_answer
+                raise UnexpetedAPIAnswerException(f"Not a json returned: \n{decoded_answer}")
         except Exception as e:
             logging.error("Whoops. Something went wrong while requesting weather information.")
             logging.error(traceback.print_exc())
-            out = {"error": e.args}
-        finally:
-            return out
+            raise UnexpetedAPIAnswerException()
+        return out
         
     async def get_weather_json(self, model: WeatherInputModel) -> dict:
         ans = await self.get_weather_raw(model)
@@ -62,7 +62,5 @@ class RequestWeather():
                 }
             }
         except Exception:
-            logging.error("Got unexpected answer from weather api")
-            return {
-                "message": "Got unexpected answer from weather api"
-            }
+            logging.error("Got unprocessable answer from weather api")
+            raise UnexpetedAPIAnswerException("Got unprocessable answer from weather api")

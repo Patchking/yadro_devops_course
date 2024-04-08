@@ -1,10 +1,11 @@
 import bestconfig
+import pydantic
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 from weather import RequestWeather
 from models import WeatherInputModel
-import pydantic
+from errors import UnexpetedAPIAnswerException
 
 config = bestconfig.Config()
 app = FastAPI()
@@ -14,17 +15,25 @@ async def validation_error_exception_handler(request: Request, exc: pydantic.Val
     return JSONResponse(
         status_code=422,
         content={
-            "message": "Wrong input"
+            "details": "Wrong input"
         }
     )
 
 @app.exception_handler(RequestValidationError)
 async def validation_error_exception_handler(request: Request, exc: RequestValidationError):
-    print(exc.args)
     return JSONResponse(
         status_code=422,
         content={
-            "message": "Wrong input"
+            "details": "Wrong input"
+        }
+    )
+
+@app.exception_handler(UnexpetedAPIAnswerException)
+async def validation_error_exception_handler(request: Request, exc: UnexpetedAPIAnswerException):
+    return JSONResponse(
+        status_code=403,
+        content={
+            "details": str(exc)
         }
     )
 
