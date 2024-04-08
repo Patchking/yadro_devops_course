@@ -41,14 +41,14 @@ class RequestWeather():
                 a["temp"] for b in ans["days"]
                 if "hours" in b
                 for a in b["hours"]
-            ] + [
+            ] + 24 * [
                 a["temp"] for a in ans["days"]
                 if "hours" not in a
                 ]
             )
             min_temperature = temperatures[0]
             max_temperature = temperatures[-1]
-            arithmetic_temperature = round(sum(temperatures) / len(temperatures), 1)
+            arithmetic_temperature = round(sum(temperatures) / len(temperatures), 2)
             median_temperature = temperatures[len(temperatures) // 2]
             return {
                 "service": "weather",
