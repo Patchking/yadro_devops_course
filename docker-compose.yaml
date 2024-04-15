@@ -1,0 +1,15 @@
+version: "3.3"
+
+services:
+    web:  
+        container_name: weather_report
+        build: ./weather_report
+        image: weather_report
+        environment:
+            - API_KEY=${API_KEY}
+            - PORT=34523
+            - VERSION=${VERSION}
+        ports:
+            - 34523:34523
+            - 34524:34524
+        restart: always
