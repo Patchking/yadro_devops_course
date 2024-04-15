@@ -3,12 +3,15 @@ import pydantic
 from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
-from weather import RequestWeather
-from models import WeatherInputModel
-from errors import UnexpetedAPIAnswerException
+import config
+print(config.sys.path)
+import views.weather 
+from models.weather import WeatherInputModel
+from exceptions.weather import UnexpetedAPIAnswerException
 
 config = bestconfig.Config()
 app = FastAPI()
+
 
 @app.exception_handler(pydantic.ValidationError)
 async def validation_error_exception_handler(request: Request, exc: pydantic.ValidationError):
@@ -49,6 +52,5 @@ async def get_info():
 
 @app.get("/info/weather")
 async def get_weather(model: WeatherInputModel = Depends()):
-    weather = RequestWeather(config.get("API_KEY"))
-    ans = await weather.get_weather_json(model)
+    ans = await views.weather.get(model)
     return JSONResponse(content=ans)
