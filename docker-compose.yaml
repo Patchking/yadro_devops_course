@@ -8,8 +8,7 @@ services:
         environment:
             - API_KEY=${API_KEY}
             - PORT=34523
-            - VERSION=${VERSION}
+            - VERSION=${VERSION:-0.1.0}
         ports:
-            - 34523:34523
-            - 34524:34524
+            - ${PORT:-8000}:34523
         restart: always

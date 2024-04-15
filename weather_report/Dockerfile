@@ -12,6 +12,6 @@ COPY    app/app.py \
         app/models.py \
         app/weather.py ./
 
-ENV APP_TMP_DATA=/tmp PYTHONPATH=/app
+ENV APP_TMP_DATA=/tmp PYTHONPATH=/app PORT=8000
 USER app
 ENTRYPOINT ["python3.11", "main.py"]
