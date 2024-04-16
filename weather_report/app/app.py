@@ -4,7 +4,6 @@ from fastapi import FastAPI, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
 from fastapi.exceptions import RequestValidationError
 import config
-print(config.sys.path)
 import views.weather 
 from models.weather import WeatherInputModel
 from exceptions.weather import UnexpetedAPIAnswerException
