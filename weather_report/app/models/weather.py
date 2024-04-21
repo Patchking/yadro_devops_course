@@ -1,4 +1,4 @@
-from pydantic import BaseModel, model_validator, ValidationError
+from pydantic import BaseModel, model_validator
 from datetime import datetime, timedelta, date
 from fastapi import HTTPException
 

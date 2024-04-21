@@ -1,4 +1,47 @@
-include:
-  - project: devops-school-2024/ci
-    ref: main
-    file: test-bare-app.yml
+run tests:
+  stage: test
+  image: ghcr.io/malinkamedok/devops_sandbox:latest
+  tags:
+    - common
+  script:
+    - run_tests
+  artifacts:
+    untracked: false
+    when: always
+    expire_in: "30 days"
+    paths:
+      - responses/*
+      - report.xml
+    reports:
+      junit: report.xml
+  only:
+    - branches
+    - merge_requests
+  except:
+    - master
+    - main
+    - tags
+  allow_failure: true
+
+lint:dockerfile:
+ image: hadolint/hadolint:fcbd01791c9251d83f2486e61ecaf41ee700a766-debian-amd64
+ tags:
+    - common
+ script:
+    - hadolint Dockerfile
+ rules:
+    - exists:
+        - Dockerfile
+
+build image:
+  stage: build
+  tags:
+    - common
+  image:
+    name: gcr.io/kaniko-project/executor:v1.22.0-debug
+    entrypoint: [""]
+  script:
+    - /kaniko/executor --context "${CI_PROJECT_DIR}" --dockerfile "${CI_PROJECT_DIR}/Dockerfile" --no-push
+  rules:
+    - exists:
+        - Dockerfile
